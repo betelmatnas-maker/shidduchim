@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>פנקס השידוכים</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap">
+<style>
+/* Layout: office ledger — a quiet header with live counts, tab strip, one working surface per tab */
+:root{
+  --bg:#f2f4f7; --surface:#ffffff; --ink:#1b2230; --muted:#5b6576; --line:#dbe0e8;
+  --accent:#1e5a85; --accent-ink:#ffffff; --accent-soft:#e2ecf5;
+  --gold:#9a6f17; --gold-soft:#f5ecd6;
+  --ok:#2c7a4c; --ok-soft:#e1f1e7; --bad:#b0393a; --bad-soft:#f8e3e3;
+  --display:"Frank Ruhl Libre","David Libre",Georgia,serif;
+  --body:"Assistant","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11151c; --surface:#19202a; --ink:#e5e9ef; --muted:#9aa4b4; --line:#2a3340;
+  --accent:#74abd8; --accent-ink:#0d1620; --accent-soft:#1c3246;
+  --gold:#d8ae57; --gold-soft:#33291a;
+  --ok:#62c08a; --ok-soft:#18311f; --bad:#e47c7c; --bad-soft:#3a1d1e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151c; --surface:#19202a; --ink:#e5e9ef; --muted:#9aa4b4; --line:#2a3340;
+  --accent:#74abd8; --accent-ink:#0d1620; --accent-soft:#1c3246;
+  --gold:#d8ae57; --gold-soft:#33291a;
+  --ok:#62c08a; --ok-soft:#18311f; --bad:#e47c7c; --bad-soft:#3a1d1e; color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}html,body{margin:0}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.app{min-height:100%}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0}
+h1{font-size:1.9rem;line-height:1.2}
+h2{font-size:1.4rem}
+h3{font-size:1.1rem}
+.top{border-bottom:1px solid var(--line);background:var(--surface)}
+.top .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between;padding-block:20px 16px}
+.sub{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column}
+.stat b{font-family:var(--display);font-size:1.5rem;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.8rem}
+.stat.gold b{color:var(--gold)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-block:12px 0;border-bottom:1px solid var(--line)}
+.tab{appearance:none;border:0;background:none;font:inherit;font-weight:600;color:var(--muted);padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:24px 64px;display:flex;flex-direction:column;gap:20px}
+.banner{background:var(--bad-soft);color:var(--bad);padding:12px 16px;border-radius:8px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.row.between{justify-content:space-between}
+.grow{flex:1 1 200px;min-width:0}
+input[type=text],input[type=search],input[type=number],input[type=date],input[type=tel],input[type=email],select,textarea{
+  font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;max-width:100%}
+textarea{min-height:84px;resize:vertical}
+label{font-weight:600}
+.btn{appearance:none;font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{padding:4px 10px;font-size:.88rem}
+.btn.link{border:0;background:none;color:var(--accent);padding:4px 6px}
+.btn:disabled{opacity:.5;cursor:default}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.pill{display:inline-block;font-size:.8rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill.active{background:var(--ok-soft);color:var(--ok)}
+.pill.inprop,.pill.checking,.pill.met{background:var(--gold-soft);color:var(--gold)}
+.pill.paused,.pill.declined{background:var(--bg);color:var(--muted)}
+.pill.engaged,.pill.mazal{background:var(--gold);color:var(--surface)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:right;font:inherit;color:inherit}
+.card:hover{border-color:var(--accent)}
+.card .nm{font-family:var(--display);font-size:1.15rem;font-weight:700}
+.card .meta{color:var(--muted);font-size:.9rem}
+.g-m,.g-f{font-size:.78rem;font-weight:700;letter-spacing:.02em}
+.g-m{color:var(--accent)} .g-f{color:var(--gold)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.empty h3{color:var(--ink)}
+/* form */
+.form{display:flex;flex-direction:column;gap:20px}
+.fsec{display:flex;flex-direction:column;gap:16px}
+.fsec>h3{border-bottom:1px solid var(--line);padding-bottom:6px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.wide{grid-column:1/-1}
+.field .help{font-size:.85rem;color:var(--muted);font-weight:400}
+.req{color:var(--bad)}
+.choices{display:flex;flex-wrap:wrap;gap:6px 16px}
+.choices label{font-weight:400;display:flex;gap:6px;align-items:center}
+.field.err input,.field.err select,.field.err textarea{border-color:var(--bad)}
+.field .errmsg{color:var(--bad);font-size:.85rem;display:none}
+.field.err .errmsg{display:block}
+.savebar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;flex-wrap:wrap;align-items:center;z-index:5}
+/* detail */
+.dl{display:grid;grid-template-columns:minmax(120px,220px) 1fr;gap:8px 16px;margin:0}
+.dl dt{color:var(--muted);font-size:.92rem}
+.dl dd{margin:0;white-space:pre-wrap;min-width:0;overflow-wrap:anywhere}
+@media (max-width:520px){.dl{grid-template-columns:1fr}.dl dd{padding-bottom:6px;border-bottom:1px solid var(--line)}}
+/* editor */
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.qcard.section{background:var(--accent-soft);border-color:transparent}
+.qhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qnum{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;min-width:2ch}
+.tbadge{font-size:.78rem;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:4px}
+.qcard.section .tbadge{background:var(--surface)}
+.qtools{margin-inline-start:auto;display:flex;gap:2px;flex-wrap:wrap}
+.matchbox{border-top:1px dashed var(--line);padding-top:10px;display:flex;flex-direction:column;gap:10px}
+.addbar{display:flex;flex-wrap:wrap;gap:6px}
+.chk{display:flex;gap:6px;align-items:center;font-weight:400}
+/* match */
+.mlist{display:flex;flex-direction:column;gap:10px}
+.mitem{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:72px 1fr auto;gap:12px 16px;align-items:center}
+.mitem.out{opacity:.6}
+@media (max-width:600px){.mitem{grid-template-columns:60px 1fr}.mitem .act{grid-column:1/-1}}
+.score{font-family:var(--display);font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent);text-align:center;line-height:1}
+.score small{display:block;font-family:var(--body);font-size:.7rem;color:var(--muted);font-weight:600;margin-top:4px}
+.why{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.why span{font-size:.78rem;padding:1px 8px;border-radius:4px}
+.why .y{background:var(--ok-soft);color:var(--ok)}
+.why .n{background:var(--bad-soft);color:var(--bad)}
+/* proposals */
+.pcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;align-items:start}
+.pcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pcol h3{display:flex;justify-content:space-between;align-items:center;font-size:1rem}
+.pcol h3 span{font-family:var(--body);color:var(--muted);font-variant-numeric:tabular-nums}
+.prop{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.prop .pair{font-family:var(--display);font-weight:700;font-size:1.02rem}
+.prop textarea{min-height:56px;font-size:.9rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:600;z-index:20;max-width:calc(100% - 32px)}
+.toast.bad{background:var(--bad);color:#fff}
+.confirm{background:var(--bad-soft);color:var(--bad);padding:10px 14px;border-radius:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+@media (prefers-reduced-motion:no-preference){.card,.btn{transition:border-color .15s}}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
+.login form{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}
+.lerr{color:var(--bad);font-weight:600;margin:0;min-height:1.4em}
+.who{display:flex;gap:10px;align-items:center;font-size:.88rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="login" class="login" dir="rtl" hidden><form id="lform" class="panel" novalidate>
+  <div><h1>פנקס השידוכים</h1><p class="sub">כניסה לצוות המשרד</p></div>
+  <div class="field"><label for="l-email">דוא״ל</label><input type="email" id="l-email" dir="ltr" autocomplete="username" required></div>
+  <div class="field"><label for="l-pass">סיסמה</label><input type="password" id="l-pass" dir="ltr" autocomplete="current-password" required></div>
+  <button class="btn primary" type="submit" id="l-btn">כניסה</button>
+  <p class="lerr" id="lerr" role="alert"></p>
+  <p class="muted small" style="margin:0">שכחת סיסמה? פני למנהלת המשרד.</p>
+</form></div>
+
+<div class="app" id="app" dir="rtl" lang="he" hidden>
+  <header class="top"><div class="wrap">
+    <div><h1>פנקס השידוכים</h1><p class="sub">מאגר המועמדים, ההצלבות וההצעות של המשרד</p></div>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end"><div class="who" id="who"></div><div class="stats" id="stats"></div></div>
+  </div></header>
+  <div class="wrap"><nav class="tabs" id="tabs" role="tablist">
+    <button class="tab" data-tab="cands" role="tab">מועמדים</button>
+    <button class="tab" data-tab="form" role="tab">הוספת מועמד</button>
+    <button class="tab" data-tab="match" role="tab">הצלבה</button>
+    <button class="tab" data-tab="props" role="tab">הצעות</button>
+    <button class="tab" data-tab="editor" role="tab">עריכת שאלון</button>
+  </nav></div>
+  <main class="wrap" id="main"></main>
+  <div class="toast" id="toast" hidden></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL='https://zovrumgfkmhoybjrxsyb.supabase.co';
+const SUPABASE_KEY='sb_publishable_KPYsvGnXpYkRkTeL-dyPNQ_2LIR9a-m';
+const TYPES={section:'כותרת חלק',short:'טקסט קצר',long:'טקסט ארוך',number:'מספר',date:'תאריך',single:'בחירה אחת (כפתורים)',select:'בחירה אחת (רשימה)',multi:'בחירה מרובה',yesno:'כן / לא',scale:'דירוג 1–5',phone:'טלפון',email:'דוא״ל'};
+const CHOICE=['single','select','multi','yesno'];
+const CST={active:'פעיל/ה',inprop:'בהצעה',paused:'מושהה',engaged:'מאורס/ת'};
+const PST={proposed:'הוצע',checking:'בבירור',met:'נפגשו',declined:'לא מתאים',mazal:'מזל טוב'};
+const S={db:null,ready:false,qDoc:false,q:[],cands:{},props:{},tab:'cands',sel:null,edit:null,matchFor:'',showOut:false,onlyActive:true,
+  draft:null,dirty:false,canAdmin:true,confirm:null,f:{q:'',g:'',st:'',ms:''},matchMs:''};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+'_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-5);
+const now=()=>new Date().toISOString();
+const opts=q=>q.type==='yesno'?['כן','לא']:(q.options||[]);
+const liveQ=()=>S.q.filter(q=>!q.archived);
+function age(bd){if(!bd)return null;const d=new Date(bd);if(isNaN(d))return null;const n=new Date();let a=n.getFullYear()-d.getFullYear();const m=n.getMonth()-d.getMonth();if(m<0||(m===0&&n.getDate()<d.getDate()))a--;return a}
+const fullName=c=>c?((c.firstName||'')+' '+(c.lastName||'')).trim()||'ללא שם':'(נמחק)';
+const gWord=g=>g==='m'?'רווק':g==='f'?'רווקה':'';
+const MST={single:['רווק','רווקה','רווק/ה'],divorced:['גרוש','גרושה','גרוש/ה'],widowed:['אלמן','אלמנה','אלמן/ה']};
+const msWord=c=>{const m=MST[c?.maritalStatus||'single'];return c?.gender==='m'?m[0]:c?.gender==='f'?m[1]:m[2]};
+const fmtDate=s=>{if(!s)return'';const d=new Date(s);return isNaN(d)?s:d.toLocaleDateString('he-IL')};
+const fmtVal=v=>Array.isArray(v)?v.join(', '):(v??'');
+function toast(msg,bad){const t=$('#toast');t.textContent=msg;t.className='toast'+(bad?' bad':'');t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3200)}
+function errMsg(e){const c=String(e&&e.code||''),m=String(e&&e.message||'');
+  if(c==='23505')return'הצעה כזאת כבר קיימת במערכת.';
+  if(c==='42501'||/row-level security|permission/i.test(m))return'אין לך הרשאה לפעולה זו.';
+  if(/fetch|network/i.test(m))return'אין חיבור לאינטרנט. בדקו את החיבור ונסו שוב.';
+  if(/JWT|session/i.test(m))return'פג תוקף הכניסה. יש לרענן את הדף ולהיכנס מחדש.';
+  return'השמירה נכשלה. נסו שוב בעוד רגע.'}
+async function write(fn,ok){if(!S.db){toast('אין חיבור למאגר, לא ניתן לשמור.',true);return false}
+  try{const r=await fn();if(r&&r.error)throw r.error;if(ok)toast(ok);return (r&&r.data)||true}catch(e){console.error(e);toast(errMsg(e),true);return false}}
+const nz=v=>v===''||v==null?null:v;
+const fromC=r=>({firstName:r.first_name,lastName:r.last_name,gender:r.gender,maritalStatus:r.marital_status,children:r.children,birthDate:r.birth_date,phone:r.phone,ageMin:r.age_min,ageMax:r.age_max,status:r.status,filledBy:r.filled_by,notes:r.notes,answers:r.answers||{},createdAt:r.created_at,updatedAt:r.updated_at});
+const toC=c=>({first_name:c.firstName,last_name:c.lastName,gender:c.gender,marital_status:c.maritalStatus||'single',children:nz(c.children),birth_date:nz(c.birthDate),phone:nz(c.phone),age_min:nz(c.ageMin),age_max:nz(c.ageMax),status:c.status,filled_by:c.filledBy,notes:nz(c.notes),answers:c.answers||{}});
+const fromP=r=>({m:r.male_id,f:r.female_id,status:r.status,notes:r.notes||'',history:r.history||[],createdAt:r.created_at,updatedAt:r.updated_at});
+
+/* ---------- stats & tabs ---------- */
+function renderStats(){const cs=Object.values(S.cands),ps=Object.values(S.props);
+  const m=cs.filter(c=>c.gender==='m'&&c.status!=='engaged'&&c.status!=='paused').length;
+  const f=cs.filter(c=>c.gender==='f'&&c.status!=='engaged'&&c.status!=='paused').length;
+  const open=ps.filter(p=>['proposed','checking','met'].includes(p.status)).length;
+  const mz=ps.filter(p=>p.status==='mazal').length;
+  $('#stats').innerHTML=`<div class="stat"><b>${m}</b><span>רווקים פעילים</span></div><div class="stat"><b>${f}</b><span>רווקות פעילות</span></div><div class="stat"><b>${open}</b><span>הצעות פתוחות</span></div><div class="stat gold"><b>${mz}</b><span>מזל טוב</span></div>`}
+function setTab(t){if(S.tab==='editor'&&S.dirty&&t!=='editor'){S.pendingTab=t;S.confirm='leaveEditor';render();return}
+  S.tab=t;S.confirm=null;if(t!=='cands')S.sel=null;if(t==='editor'){S.draft=null;S.dirty=false}window.scrollTo(0,0);render()}
+function render(){renderStats();
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===S.tab)));
+  const m=$('#main');let h='';
+  if(!S.db&&S.ready)h+=`<div class="banner">אין חיבור למסד הנתונים. בדקו את החיבור לאינטרנט ורעננו את הדף.</div>`;
+  if(!S.ready)h+=`<div class="empty"><h3>טוען את המאגר…</h3></div>`;
+  else h+=({cands:viewCands,form:viewForm,match:viewMatch,props:viewProps,editor:viewEditor})[S.tab]();
+  m.innerHTML=h;
+  if(S.tab==='cands'&&!S.sel)renderList();
+  if(S.tab==='form')afterForm();
+}
+
+/* ---------- candidates ---------- */
+function viewCands(){if(S.sel)return viewDetail(S.sel);
+  const f=S.f;
+  return `<div class="row between"><h2>מועמדים</h2><button class="btn primary" data-act="new">מועמד/ת חדש/ה</button></div>
+  <div class="row">
+    <div class="grow"><input type="search" id="f-q" placeholder="חיפוש לפי שם, עיר או כל פרט אחר" value="${esc(f.q)}" aria-label="חיפוש"></div>
+    <select id="f-g" aria-label="סינון לפי מין" style="width:auto"><option value="">רווקים ורווקות</option><option value="m" ${f.g==='m'?'selected':''}>רווקים</option><option value="f" ${f.g==='f'?'selected':''}>רווקות</option></select>
+    <select id="f-ms" aria-label="סינון לפי מצב משפחתי" style="width:auto"><option value="">כל מצב משפחתי</option>${Object.entries(MST).map(([k,v])=>`<option value="${k}" ${f.ms===k?'selected':''}>${v[2]}</option>`).join('')}</select>
+    <select id="f-st" aria-label="סינון לפי סטטוס" style="width:auto"><option value="">כל הסטטוסים</option>${Object.entries(CST).map(([k,v])=>`<option value="${k}" ${f.st===k?'selected':''}>${v}</option>`).join('')}</select>
+  </div><div id="list"></div>`}
+function highlights(c){const out=[];for(const q of liveQ()){if(out.length>=2)break;if(!['short','single','select'].includes(q.type))continue;const v=c.answers?.[q.id];if(v)out.push(esc(fmtVal(v)))}return out.join(' · ')}
+function renderList(){const el=$('#list');if(!el)return;const f=S.f;
+  let cs=Object.entries(S.cands);
+  if(!cs.length){el.innerHTML=`<div class="empty"><h3>עדיין אין מועמדים במאגר</h3><p>כל רווק ורווקה שיירשמו יופיעו כאן ככרטיס, עם גיל, עיר וסטטוס. מכאן גם נכנסים לכרטיס המלא ולהצלבה.</p><button class="btn primary" data-act="new">הוספת המועמד הראשון</button></div>`;return}
+  const term=f.q.trim();
+  cs=cs.filter(([id,c])=>(!f.g||c.gender===f.g)&&(!f.ms||(c.maritalStatus||'single')===f.ms)&&(!f.st||c.status===f.st)&&(!term||(fullName(c)+' '+(c.phone||'')+' '+Object.values(c.answers||{}).map(fmtVal).join(' ')).includes(term)));
+  cs.sort((a,b)=>(b[1].updatedAt||'').localeCompare(a[1].updatedAt||''));
+  if(!cs.length){el.innerHTML=`<div class="empty"><p>לא נמצאו מועמדים התואמים לחיפוש.</p></div>`;return}
+  el.innerHTML=`<div class="cards">${cs.map(([id,c])=>{const a=age(c.birthDate);return `<button class="card" data-act="open" data-id="${id}">
+    <div class="row between"><span class="g-${c.gender}">${msWord(c)}${c.children?' · '+c.children+' ילדים':''}</span><span class="pill ${c.status}">${CST[c.status]||''}</span></div>
+    <div class="nm">${esc(fullName(c))}</div>
+    <div class="meta">${a!=null?'בן/בת '+a:''}${a!=null&&highlights(c)?' · ':''}${highlights(c)}</div></button>`}).join('')}</div>
+    <p class="muted small">${cs.length} מועמדים מוצגים</p>`}
+function viewDetail(id){const c=S.cands[id];if(!c){S.sel=null;return viewCands()}
+  const a=age(c.birthDate);
+  let secs=[],cur={title:'פרטי השאלון',rows:[]};
+  for(const q of S.q){if(q.type==='section'){if(!q.archived){if(cur.rows.length)secs.push(cur);cur={title:q.label,rows:[]}}continue}
+    const v=c.answers?.[q.id];if(v==null||v===''||(Array.isArray(v)&&!v.length))continue;
+    cur.rows.push(`<dt>${esc(q.label)}${q.archived?' <span class="small">(שאלה שהוסרה)</span>':''}</dt><dd>${esc(q.type==='date'?fmtDate(v):fmtVal(v))}</dd>`)}
+  if(cur.rows.length)secs.push(cur);
+  const ps=Object.entries(S.props).filter(([,p])=>p.m===id||p.f===id);
+  return `<div class="row"><button class="btn link" data-act="back">→ חזרה לרשימה</button></div>
+  <div class="panel" style="display:flex;flex-direction:column;gap:16px">
+    <div class="row between"><div><span class="g-${c.gender}">${msWord(c)}</span><h2>${esc(fullName(c))}</h2></div><span class="pill ${c.status}">${CST[c.status]||''}</span></div>
+    <dl class="dl">
+      <dt>גיל</dt><dd>${a??'—'}${c.birthDate?' (נולד/ה '+esc(fmtDate(c.birthDate))+')':''}</dd>
+      <dt>מצב משפחתי</dt><dd>${msWord(c)}${(c.maritalStatus&&c.maritalStatus!=='single')?' · ילדים: '+esc(c.children??'—'):''}</dd>
+      <dt>טלפון</dt><dd>${esc(c.phone||'—')}</dd>
+      <dt>טווח גילאים מבוקש</dt><dd>${c.ageMin||c.ageMax?`${c.ageMin||'?'}–${c.ageMax||'?'}`:'—'}</dd>
+      <dt>מילוי השאלון</dt><dd>${c.filledBy==='self'?'על ידי המועמד/ת':'על ידי השדכנית'} · עודכן ${esc(fmtDate(c.updatedAt))}</dd>
+    </dl>
+    <div class="row"><button class="btn primary" data-act="edit" data-id="${id}">עריכת פרטים</button><button class="btn" data-act="matchfor" data-id="${id}">חיפוש התאמות</button><button class="btn danger" data-act="askdel" data-id="${id}">מחיקה</button></div>
+    ${S.confirm==='del:'+id?`<div class="confirm">למחוק את ${esc(fullName(c))} מהמאגר לצמיתות? <button class="btn danger small" data-act="del" data-id="${id}">כן, למחוק</button><button class="btn small" data-act="cancel">ביטול</button></div>`:''}
+  </div>
+  ${c.notes?`<div class="panel"><h3>הערות השדכנית</h3><p style="white-space:pre-wrap;margin:8px 0 0">${esc(c.notes)}</p></div>`:''}
+  ${secs.map(s=>`<div class="panel"><h3 style="margin-bottom:12px">${esc(s.title)}</h3><dl class="dl">${s.rows.join('')}</dl></div>`).join('')||`<div class="panel muted">עדיין לא מולאו תשובות לשאלון.</div>`}
+  <div class="panel"><h3 style="margin-bottom:10px">הצעות</h3>${ps.length?ps.map(([pid,p])=>{const o=S.cands[p.m===id?p.f:p.m];return `<div class="row between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${esc(fullName(o))} <span class="muted small">· ${esc(fmtDate(p.createdAt))}</span></span><span class="pill ${p.status}">${PST[p.status]}</span></div>`}).join(''):'<p class="muted" style="margin:0">עדיין לא הוצעו הצעות.</p>'}</div>`}
+
+/* ---------- candidate form ---------- */
+function fieldHtml(q,v){const n='a_'+q.id,req=q.required?' <span class="req">*</span>':'',help=q.help?`<span class="help">${esc(q.help)}</span>`:'';
+  const wide=['long','multi','single','scale'].includes(q.type)?' wide':'';
+  let inp='';
+  switch(q.type){
+    case'long':inp=`<textarea id="${n}" name="${n}">${esc(v)}</textarea>`;break;
+    case'number':inp=`<input type="number" id="${n}" name="${n}" value="${esc(v)}" inputmode="numeric">`;break;
+    case'date':inp=`<input type="date" id="${n}" name="${n}" value="${esc(v)}">`;break;
+    case'phone':inp=`<input type="tel" id="${n}" name="${n}" value="${esc(v)}" dir="ltr">`;break;
+    case'email':inp=`<input type="email" id="${n}" name="${n}" value="${esc(v)}" dir="ltr">`;break;
+    case'select':inp=`<select id="${n}" name="${n}"><option value="">בחירה…</option>${opts(q).map(o=>`<option ${v===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`;break;
+    case'single':case'yesno':inp=`<div class="choices" role="radiogroup">${opts(q).map((o,i)=>`<label><input type="radio" name="${n}" id="${n}_${i}" value="${esc(o)}" ${v===o?'checked':''}>${esc(o)}</label>`).join('')}</div>`;break;
+    case'multi':{const arr=Array.isArray(v)?v:[];inp=`<div class="choices">${opts(q).map((o,i)=>`<label><input type="checkbox" name="${n}" id="${n}_${i}" value="${esc(o)}" ${arr.includes(o)?'checked':''}>${esc(o)}</label>`).join('')}</div>`;break}
+    case'scale':inp=`<div class="choices" role="radiogroup">${[1,2,3,4,5].map(i=>`<label><input type="radio" name="${n}" id="${n}_${i}" value="${i}" ${String(v)===String(i)?'checked':''}>${i}</label>`).join('')}</div>`;break;
+    default:inp=`<input type="text" id="${n}" name="${n}" value="${esc(v)}">`}
+  return `<div class="field${wide}" data-q="${q.id}" data-show="${q.showFor||'all'}"><label for="${n}">${esc(q.label)}${req}</label>${help}${inp}<span class="errmsg">יש למלא שדה זה</span></div>`}
+function viewForm(){const c=S.edit?S.cands[S.edit]:null;const d=c||{gender:'',status:'active',filledBy:'shadchanit',answers:{}};
+  const sel=(v,x)=>v===x?'selected':'';
+  let custom='',open=false;
+  for(const q of liveQ()){if(q.type==='section'){if(open)custom+='</div></div>';custom+=`<div class="fsec" data-show="${q.showFor||'all'}"><h3>${esc(q.label)}</h3>${q.help?`<p class="muted small" style="margin:0">${esc(q.help)}</p>`:''}<div class="fgrid">`;open=true;continue}
+    if(!open){custom+=`<div class="fsec"><h3>פרטים נוספים</h3><div class="fgrid">`;open=true}
+    custom+=fieldHtml(q,d.answers?.[q.id]??'')}
+  if(open)custom+='</div></div>';
+  return `<div class="row between"><h2>${c?'עריכת '+esc(fullName(c)):'מועמד/ת חדש/ה'}</h2>${c?`<button class="btn link" data-act="canceledit">ביטול</button>`:''}</div>
+  <form class="form" id="cform" novalidate>
+   <div class="fsec"><h3>פרטים בסיסיים</h3><div class="fgrid">
+    <div class="field" data-q="firstName"><label for="b-first">שם פרטי <span class="req">*</span></label><input type="text" id="b-first" value="${esc(d.firstName)}"><span class="errmsg">יש למלא שם פרטי</span></div>
+    <div class="field" data-q="lastName"><label for="b-last">שם משפחה <span class="req">*</span></label><input type="text" id="b-last" value="${esc(d.lastName)}"><span class="errmsg">יש למלא שם משפחה</span></div>
+    <div class="field" data-q="gender"><label>מועמד או מועמדת <span class="req">*</span></label><div class="choices" role="radiogroup"><label><input type="radio" name="b-gender" id="b-g-m" value="m" ${d.gender==='m'?'checked':''}>מועמד (גבר)</label><label><input type="radio" name="b-gender" id="b-g-f" value="f" ${d.gender==='f'?'checked':''}>מועמדת (אישה)</label></div><span class="errmsg">יש לבחור</span></div>
+    <div class="field"><label for="b-ms">מצב משפחתי <span class="req">*</span></label><select id="b-ms">${Object.entries(MST).map(([k,v])=>`<option value="${k}" ${(d.maritalStatus||'single')===k?'selected':''}>${v[2]}</option>`).join('')}</select></div>
+    <div class="field" id="b-kids-wrap"><label for="b-kids">מספר ילדים</label><input type="number" id="b-kids" min="0" value="${esc(d.children)}" inputmode="numeric"></div>
+    <div class="field" data-q="birthDate"><label for="b-birth">תאריך לידה <span class="req">*</span></label><input type="date" id="b-birth" value="${esc(d.birthDate)}"><span class="errmsg">יש למלא תאריך לידה</span></div>
+    <div class="field"><label for="b-phone">טלפון</label><input type="tel" id="b-phone" dir="ltr" value="${esc(d.phone)}"></div>
+    <div class="field"><label>טווח גילאים מבוקש</label><div class="row" style="flex-wrap:nowrap"><input type="number" id="b-amin" placeholder="מגיל" value="${esc(d.ageMin)}" aria-label="מגיל"><span>–</span><input type="number" id="b-amax" placeholder="עד גיל" value="${esc(d.ageMax)}" aria-label="עד גיל"></div></div>
+    <div class="field"><label for="b-status">סטטוס</label><select id="b-status">${Object.entries(CST).map(([k,v])=>`<option value="${k}" ${sel(d.status,k)}>${v}</option>`).join('')}</select></div>
+    <div class="field"><label for="b-by">מי ממלא את השאלון</label><select id="b-by"><option value="shadchanit" ${sel(d.filledBy,'shadchanit')}>השדכנית (לפי ראיון)</option><option value="self" ${sel(d.filledBy,'self')}>המועמד/ת בעצמו/ה</option></select></div>
+   </div></div>
+   ${custom||`<div class="empty"><p>השאלון עדיין ריק. אפשר להוסיף שאלות בלשונית "עריכת שאלון".</p></div>`}
+   <div class="fsec"><h3>הערות פנימיות</h3><div class="field wide"><label for="b-notes">הערות השדכנית <span class="help">לא מוצג למועמד</span></label><textarea id="b-notes">${esc(d.notes)}</textarea></div></div>
+   <div class="savebar"><button class="btn primary" type="submit" id="b-save">${c?'שמירת שינויים':'שמירת מועמד/ת'}</button><span class="muted small">שדות המסומנים ב-<span class="req">*</span> הם חובה</span></div>
+  </form>`}
+function applyShow(){const g=(document.querySelector('input[name="b-gender"]:checked')||{}).value||'';
+  const kw=$('#b-kids-wrap');if(kw)kw.hidden=$('#b-ms').value==='single';
+  document.querySelectorAll('#cform [data-show]').forEach(el=>{const s=el.dataset.show;el.hidden=!(s==='all'||!g||s===g)})}
+function afterForm(){const f=$('#cform');if(!f)return;applyShow();
+  f.addEventListener('change',e=>{if(e.target.name==='b-gender'||e.target.id==='b-ms')applyShow();const fd=e.target.closest('.field');if(fd)fd.classList.remove('err')});
+  f.addEventListener('submit',e=>{e.preventDefault();saveCand()})}
+async function saveCand(){const f=$('#cform');let bad=null;const mark=key=>{const el=f.querySelector(`.field[data-q="${key}"]`);if(el){el.classList.add('err');bad=bad||el}};
+  f.querySelectorAll('.field.err').forEach(e=>e.classList.remove('err'));
+  const gv=(f.querySelector('input[name="b-gender"]:checked')||{}).value||'';
+  const base={firstName:$('#b-first').value.trim(),lastName:$('#b-last').value.trim(),gender:gv,birthDate:$('#b-birth').value,phone:$('#b-phone').value.trim(),
+    ageMin:$('#b-amin').value?+$('#b-amin').value:null,ageMax:$('#b-amax').value?+$('#b-amax').value:null,maritalStatus:$('#b-ms').value,children:($('#b-ms').value!=='single'&&$('#b-kids').value!=='')?+$('#b-kids').value:null,status:$('#b-status').value,filledBy:$('#b-by').value,notes:$('#b-notes').value};
+  if(!base.firstName)mark('firstName');if(!base.lastName)mark('lastName');if(!gv)mark('gender');if(!base.birthDate)mark('birthDate');
+  const answers={};
+  for(const q of liveQ()){if(q.type==='section')continue;const wrap=f.querySelector(`.field[data-q="${q.id}"]`);if(!wrap||wrap.hidden)continue;
+    const n='a_'+q.id;let v;
+    if(q.type==='multi')v=[...f.querySelectorAll(`input[name="${n}"]:checked`)].map(i=>i.value);
+    else if(['single','yesno','scale'].includes(q.type)){const c=f.querySelector(`input[name="${n}"]:checked`);v=c?c.value:'';if(q.type==='scale'&&v)v=+v}
+    else{v=f.querySelector(`[name="${n}"]`).value.trim();if(q.type==='number'&&v!=='')v=+v}
+    const empty=v===''||(Array.isArray(v)&&!v.length);
+    if(q.required&&empty)mark(q.id);
+    if(!empty)answers[q.id]=v}
+  if(bad){bad.scrollIntoView({block:'center',behavior:'smooth'});toast('חסרים פרטים בשדות החובה',true);return}
+  const old=S.edit?S.cands[S.edit]:null;
+  // keep answers of hidden/archived questions so nothing is lost
+  const kept={...(old?.answers||{})};for(const q of liveQ())if(q.type!=='section'){const w=f.querySelector(`.field[data-q="${q.id}"]`);if(w&&!w.hidden)delete kept[q.id]}
+  const doc={...base,answers:{...kept,...answers}};
+  $('#b-save').disabled=true;
+  const r=await write(()=>S.edit?S.db.from('candidates').update(toC(doc)).eq('id',S.edit).select().single():S.db.from('candidates').insert(toC(doc)).select().single(),old?'השינויים נשמרו':'המועמד/ת נוספ/ה למאגר');
+  if(r&&r.id){S.cands[r.id]=fromC(r);S.edit=null;S.tab='cands';S.sel=r.id;window.scrollTo(0,0);render()}else $('#b-save').disabled=false}
+
+/* ---------- matching ---------- */
+const val=(c,id)=>{const v=c?.answers?.[id];return v==null||v===''||(Array.isArray(v)&&!v.length)?null:v};
+const arr=v=>Array.isArray(v)?v:[v];
+function scorePair(A,B){let pts=0,max=0,out=null;const why=[];
+  const aA=age(A.birthDate),aB=age(B.birthDate);
+  if(aB!=null&&((A.ageMin&&aB<A.ageMin)||(A.ageMax&&aB>A.ageMax)))out=`גיל ${aB} מחוץ לטווח שביקש/ה ${fullName(A)}`;
+  else if(aA!=null&&((B.ageMin&&aA<B.ageMin)||(B.ageMax&&aA>B.ageMax)))out=`גיל ${aA} מחוץ לטווח שביקש/ה ${fullName(B)}`;
+  for(const q of liveQ()){const m=q.match;if(!m||m.mode==='none'||!m.mode)continue;const w=+m.weight||1;
+    if(m.mode==='same'){const a=val(A,q.id),b=val(B,q.id);if(a==null||b==null)continue;const ok=arr(a).some(x=>arr(b).map(String).includes(String(x)));
+      max+=w;if(ok)pts+=w;why.push({ok,t:q.label});if(!ok&&m.hard&&!out)out=`${q.label}: אין התאמה`}
+    else if(m.mode==='pref'){if(!S.q.find(x=>x.id===m.target))continue;
+      for(const[X,Y]of[[A,B],[B,A]]){const p=val(X,q.id),act=val(Y,m.target);if(p==null||act==null)continue;
+        const ok=arr(act).some(x=>arr(p).map(String).includes(String(x)));max+=w;if(ok)pts+=w;
+        why.push({ok,t:`${q.label} (${X.firstName||''})`});if(!ok&&m.hard&&!out)out=`${q.label} של ${fullName(X)} אינו מתאים`}}}
+  return {score:max?Math.round(pts/max*100):null,why,out,ageDiff:aA!=null&&aB!=null?Math.abs(aA-aB):99}}
+function pairKey(a,b,ca){return ca.gender==='m'?a+'|'+b:b+'|'+a}
+function viewMatch(){const cs=Object.entries(S.cands).sort((a,b)=>fullName(a[1]).localeCompare(fullName(b[1]),'he'));
+  if(!cs.length)return `<h2>הצלבה</h2><div class="empty"><h3>אין עדיין מועמדים להצלבה</h3><p>אחרי שיתווספו רווקים ורווקות, כאן בוחרים מועמד/ת ומקבלים רשימת התאמות מדורגת.</p><button class="btn primary" data-act="new">הוספת מועמד</button></div>`;
+  const hasRules=liveQ().some(q=>q.match&&q.match.mode&&q.match.mode!=='none');
+  let res='';const A=S.cands[S.matchFor];
+  if(A){const taken=new Set(Object.values(S.props).map(p=>p.m+'|'+p.f));
+    let rows=cs.filter(([id,c])=>id!==S.matchFor&&c.gender&&c.gender!==A.gender&&(!S.onlyActive||['active','inprop'].includes(c.status))&&(!S.matchMs||(S.matchMs==='single'?(c.maritalStatus||'single')==='single':(c.maritalStatus||'single')!=='single')))
+      .map(([id,c])=>({id,c,r:scorePair(A,c),prop:taken.has(pairKey(S.matchFor,id,A))}));
+    rows.sort((x,y)=>(!!x.r.out-!!y.r.out)||((y.r.score??-1)-(x.r.score??-1))||(x.r.ageDiff-y.r.ageDiff));
+    const inn=rows.filter(r=>!r.r.out),outs=rows.filter(r=>r.r.out);
+    const item=({id,c,r,prop})=>{const a=age(c.birthDate);return `<div class="mitem${r.out?' out':''}">
+      <div class="score">${r.score==null?'—':r.score+'%'}<small>התאמה</small></div>
+      <div style="min-width:0"><div><b style="font-family:var(--display);font-size:1.1rem">${esc(fullName(c))}</b> <span class="muted small">· ${msWord(c)}${c.children?' ('+c.children+' ילדים)':''} ${a!=null?'· '+a:''} ${highlights(c)?'· '+highlights(c):''}</span></div>
+        ${r.out?`<div class="small" style="color:var(--bad)">${esc(r.out)}</div>`:''}
+        ${r.why.length?`<div class="why">${r.why.map(w=>`<span class="${w.ok?'y':'n'}">${w.ok?'✓':'✗'} ${esc(w.t)}</span>`).join('')}</div>`:''}</div>
+      <div class="act row">${prop?'<span class="pill">כבר הוצע</span>':`<button class="btn primary small" data-act="propose" data-id="${id}">יצירת הצעה</button>`}<button class="btn small" data-act="open" data-id="${id}">כרטיס</button></div></div>`};
+    res=`<p class="muted" style="margin:0">${inn.length} התאמות אפשריות ל${esc(fullName(A))}${outs.length?`, ו-${outs.length} שנפסלו`:''}.</p>
+      ${!hasRules?`<div class="panel small">עדיין לא הוגדרו כללי התאמה, ולכן הדירוג הוא לפי גיל בלבד. בלשונית "עריכת שאלון" אפשר לסמן לכל שאלת בחירה איך היא משתתפת בהצלבה.</div>`:''}
+      <div class="mlist">${inn.map(item).join('')||'<div class="empty"><p>לא נמצאו התאמות העומדות בכל התנאים.</p></div>'}</div>
+      ${outs.length?`<button class="btn link" data-act="toggleout">${S.showOut?'הסתרת':'הצגת'} המועמדים שנפסלו (${outs.length})</button>${S.showOut?`<div class="mlist">${outs.map(item).join('')}</div>`:''}`:''}`}
+  return `<h2>הצלבה</h2>
+  <div class="panel row"><div class="grow"><label for="m-for">חיפוש התאמות עבור</label><select id="m-for"><option value="">בחירת מועמד/ת…</option>
+    <optgroup label="רווקים">${cs.filter(([,c])=>c.gender==='m').map(([id,c])=>`<option value="${id}" ${S.matchFor===id?'selected':''}>${esc(fullName(c))}${c.status==='engaged'?' (מאורס)':''}</option>`).join('')}</optgroup>
+    <optgroup label="רווקות">${cs.filter(([,c])=>c.gender==='f').map(([id,c])=>`<option value="${id}" ${S.matchFor===id?'selected':''}>${esc(fullName(c))}${c.status==='engaged'?' (מאורסת)':''}</option>`).join('')}</optgroup></select></div>
+    <div><label for="m-ms">מצב משפחתי</label><select id="m-ms"><option value="">הכול</option><option value="single" ${S.matchMs==='single'?'selected':''}>רווקים ורווקות בלבד</option><option value="prev" ${S.matchMs==='prev'?'selected':''}>גרושים ואלמנים בלבד</option></select></div>
+    <label class="chk"><input type="checkbox" id="m-active" ${S.onlyActive?'checked':''}>רק מועמדים פעילים ובהצעה</label></div>${res}`}
+
+/* ---------- proposals ---------- */
+function viewProps(){const ps=Object.entries(S.props);
+  if(!ps.length)return `<h2>הצעות</h2><div class="empty"><h3>עדיין אין הצעות</h3><p>הצעה נוצרת מלשונית ההצלבה בלחיצה על "יצירת הצעה". כאן עוקבים אחריה משלב ההצעה ועד מזל טוב.</p><button class="btn primary" data-tab-go="match">מעבר להצלבה</button></div>`;
+  ps.sort((a,b)=>(b[1].updatedAt||'').localeCompare(a[1].updatedAt||''));
+  return `<h2>הצעות</h2><div class="pcols">${Object.entries(PST).map(([k,v])=>{const list=ps.filter(([,p])=>p.status===k);
+    return `<div class="pcol"><h3>${v} <span>${list.length}</span></h3>${list.map(([pid,p])=>`<div class="prop">
+      <div class="pair"><button class="btn link" data-act="open" data-id="${p.m}" style="padding:0;font:inherit">${esc(fullName(S.cands[p.m]))}</button> ו<button class="btn link" data-act="open" data-id="${p.f}" style="padding:0;font:inherit">${esc(fullName(S.cands[p.f]))}</button></div>
+      <div class="muted small">נפתחה ${esc(fmtDate(p.createdAt))}${p.updatedAt&&p.updatedAt!==p.createdAt?' · עודכנה '+esc(fmtDate(p.updatedAt)):''}</div>
+      <select data-pst="${pid}" aria-label="שלב ההצעה">${Object.entries(PST).map(([kk,vv])=>`<option value="${kk}" ${kk===p.status?'selected':''}>${vv}</option>`).join('')}</select>
+      <textarea data-pnote="${pid}" id="pn-${pid}" placeholder="הערות: מה נבדק, מי התקשר, מה הלאה">${esc(p.notes)}</textarea>
+      ${S.confirm==='pdel:'+pid?`<div class="confirm small">למחוק את ההצעה? <button class="btn danger small" data-act="pdel" data-id="${pid}">מחיקה</button><button class="btn small" data-act="cancel">ביטול</button></div>`:`<button class="btn link small" data-act="askpdel" data-id="${pid}" style="align-self:flex-start">מחיקת ההצעה</button>`}
+    </div>`).join('')||'<p class="muted small" style="margin:0">אין הצעות בשלב זה</p>'}</div>`}).join('')}</div>`}
+
+/* ---------- questionnaire editor ---------- */
+function viewEditor(){
+  if(!S.canAdmin)return `<h2>עריכת שאלון</h2><div class="panel">רק מנהלי המערכת יכולים לערוך את השאלון. אפשר לבקש מבעלת המערכת הרשאת עריכה.</div>`;
+  if(!S.draft)S.draft=JSON.parse(JSON.stringify(S.q));
+  const D=S.draft,live=D.map((q,i)=>[q,i]).filter(([q])=>!q.archived),arch=D.map((q,i)=>[q,i]).filter(([q])=>q.archived);
+  const choiceQs=D.filter(q=>!q.archived&&CHOICE.includes(q.type));
+  let n=0;
+  const card=([q,i],k)=>{const isSec=q.type==='section';if(!isSec)n++;const m=q.match||{mode:'none'};
+    return `<div class="qcard${isSec?' section':''}">
+     <div class="qhead">${isSec?'':`<span class="qnum">${n}</span>`}<span class="tbadge">${TYPES[q.type]}</span>${q.required&&!isSec?'<span class="tbadge" style="color:var(--bad)">חובה</span>':''}${m.mode&&m.mode!=='none'?'<span class="tbadge" style="color:var(--gold)">בהצלבה</span>':''}
+      <div class="qtools"><button class="btn link small" data-act="q-up" data-i="${i}" ${k===0?'disabled':''} aria-label="הזזה למעלה">▲</button><button class="btn link small" data-act="q-down" data-i="${i}" ${k===live.length-1?'disabled':''} aria-label="הזזה למטה">▼</button><button class="btn link small" data-act="q-dup" data-i="${i}">שכפול</button><button class="btn link small" data-act="q-remove" data-i="${i}" style="color:var(--bad)">הסרה</button></div></div>
+     <div class="fgrid">
+      <div class="field"><label for="ql-${i}">${isSec?'שם החלק':'נוסח השאלה'}</label><input type="text" id="ql-${i}" data-i="${i}" data-k="label" value="${esc(q.label)}"></div>
+      <div class="field"><label for="qt-${i}">סוג</label><select id="qt-${i}" data-i="${i}" data-k="type">${Object.entries(TYPES).map(([t,l])=>`<option value="${t}" ${q.type===t?'selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="field"><label for="qh-${i}">הסבר קצר <span class="help">רשות</span></label><input type="text" id="qh-${i}" data-i="${i}" data-k="help" value="${esc(q.help)}"></div>
+      <div class="field"><label for="qs-${i}">מוצג עבור</label><select id="qs-${i}" data-i="${i}" data-k="showFor"><option value="all" ${(q.showFor||'all')==='all'?'selected':''}>רווקים ורווקות</option><option value="m" ${q.showFor==='m'?'selected':''}>רווקים בלבד</option><option value="f" ${q.showFor==='f'?'selected':''}>רווקות בלבד</option></select></div>
+      ${['single','select','multi'].includes(q.type)?`<div class="field wide"><label for="qo-${i}">אפשרויות תשובה <span class="help">כל אפשרות בשורה נפרדת</span></label><textarea id="qo-${i}" data-i="${i}" data-k="options" style="min-height:110px">${esc((q.options||[]).join('\n'))}</textarea></div>`:''}
+      ${isSec?'':`<label class="chk"><input type="checkbox" id="qr-${i}" data-i="${i}" data-k="required" ${q.required?'checked':''}>שאלת חובה</label>`}
+     </div>
+     ${CHOICE.includes(q.type)?`<div class="matchbox"><div class="fgrid">
+       <div class="field"><label for="qm-${i}">שימוש בהצלבה</label><select id="qm-${i}" data-i="${i}" data-k="mmode">
+         <option value="none" ${m.mode==='none'||!m.mode?'selected':''}>לא משתתפת בהצלבה</option>
+         <option value="same" ${m.mode==='same'?'selected':''}>מתאים כששני הצדדים ענו אותו דבר</option>
+         <option value="pref" ${m.mode==='pref'?'selected':''}>העדפה, שנבדקת מול תשובת הצד השני</option></select></div>
+       ${m.mode==='pref'?`<div class="field"><label for="qmt-${i}">נבדקת מול השאלה</label><select id="qmt-${i}" data-i="${i}" data-k="mtarget"><option value="">בחירת שאלה…</option>${choiceQs.filter(x=>x.id!==q.id).map(x=>`<option value="${x.id}" ${m.target===x.id?'selected':''}>${esc(x.label)}</option>`).join('')}</select>
+         ${m.target?`<button type="button" class="btn link small" data-act="copyopts" data-i="${i}" style="align-self:flex-start">העתקת האפשרויות מהשאלה הזאת</button>`:''}</div>`:''}
+       ${m.mode&&m.mode!=='none'?`<div class="field"><label for="qmw-${i}">חשיבות</label><select id="qmw-${i}" data-i="${i}" data-k="mweight">${[1,2,3,4,5].map(w=>`<option value="${w}" ${(+m.weight||1)===w?'selected':''}>${w}${w===1?' (נמוכה)':w===5?' (גבוהה)':''}</option>`).join('')}</select></div>
+         <label class="chk"><input type="checkbox" id="qmh-${i}" data-i="${i}" data-k="mhard" ${m.hard?'checked':''}>תנאי סף: אי-התאמה פוסלת</label>`:''}
+     </div>${m.mode==='pref'?'<p class="muted small" style="margin:0">לדוגמה: "מגזרים שמתאימים לך" נבדקת מול "השתייכות מגזרית" של הצד השני, בשני הכיוונים. כדאי שנוסח האפשרויות יהיה זהה בשתי השאלות.</p>':''}</div>`:''}
+    </div>`};
+  return `<div class="row between"><div><h2>עריכת שאלון</h2><p class="muted" style="margin:4px 0 0">השאלות כאן מופיעות בטופס של כל מועמד. הפרטים הבסיסיים (שם, מין, תאריך לידה, טלפון וטווח גילאים) קבועים ותמיד מופיעים.</p></div></div>
+  ${live.length?live.map(card).join(''):`<div class="empty"><h3>השאלון ריק</h3><p>הוסיפו כותרת חלק ושאלות בעזרת הכפתורים למטה.</p></div>`}
+  <div class="panel"><h3 style="margin-bottom:10px">הוספה</h3><div class="addbar">${Object.entries(TYPES).map(([t,l])=>`<button class="btn small" data-act="add-q" data-type="${t}">+ ${l}</button>`).join('')}</div></div>
+  ${arch.length?`<div class="panel"><h3 style="margin-bottom:6px">שאלות מוסתרות</h3><p class="muted small" style="margin:0 0 10px">שאלות שהוסרו אחרי שכבר נענו. התשובות הקיימות נשמרות בכרטיסי המועמדים.</p>${arch.map(([q,i])=>`<div class="row between" style="padding:6px 0;border-top:1px solid var(--line)"><span>${esc(q.label)} <span class="muted small">· ${TYPES[q.type]}</span></span><button class="btn small" data-act="q-restore" data-i="${i}">שחזור</button></div>`).join('')}</div>`:''}
+  ${S.confirm==='leaveEditor'?`<div class="confirm">יש שינויים בשאלון שלא נשמרו. <button class="btn danger small" data-act="discard">לצאת בלי לשמור</button><button class="btn small" data-act="cancel">להישאר</button></div>`:''}
+  <div class="savebar"><button class="btn primary" data-act="ed-save" id="ed-save" ${S.dirty?'':'disabled'}>שמירת השאלון</button><button class="btn" data-act="discard" ${S.dirty?'':'disabled'}>ביטול השינויים</button><span class="muted small" id="ed-state">${S.dirty?'יש שינויים שלא נשמרו':'השאלון שמור'}</span></div>`}
+function markDirty(){S.dirty=true;const s=$('#ed-save');if(s){s.disabled=false;s.nextElementSibling.disabled=false;$('#ed-state').textContent='יש שינויים שלא נשמרו'}}
+function edInput(el){const i=+el.dataset.i,k=el.dataset.k,q=S.draft[i];if(!q)return;q.match=q.match||{mode:'none'};let re=false;
+  switch(k){case'label':q.label=el.value;break;case'help':q.help=el.value;break;case'showFor':q.showFor=el.value;break;case'required':q.required=el.checked;break;
+    case'options':q.options=el.value.split('\n').map(s=>s.trim()).filter(Boolean);break;
+    case'type':q.type=el.value;if(['single','select','multi'].includes(q.type)&&!(q.options||[]).length)q.options=['אפשרות א','אפשרות ב'];if(!CHOICE.includes(q.type))q.match={mode:'none'};if(q.type==='section')q.required=false;re=true;break;
+    case'mmode':q.match.mode=el.value;if(!q.match.weight)q.match.weight=2;re=true;break;
+    case'mtarget':q.match.target=el.value;re=true;break;case'mweight':q.match.weight=+el.value;break;case'mhard':q.match.hard=el.checked;re=true;break}
+  if(re){S.dirty=true;render()}else markDirty()}
+async function saveEditor(){const D=S.draft;
+  for(const q of D.filter(q=>!q.archived)){
+    if(!q.label.trim()){toast('לכל שאלה צריך להיות נוסח',true);return}
+    if(['single','select','multi'].includes(q.type)&&(q.options||[]).length<2){toast(`לשאלה "${q.label}" צריך לפחות שתי אפשרויות`,true);return}
+    if(q.match?.mode==='pref'&&!q.match.target){toast(`לשאלה "${q.label}" צריך לבחור מול איזו שאלה היא נבדקת`,true);return}}
+  const ok=await write(()=>S.db.from('settings').upsert({key:'questionnaire',value:{questions:D}}),'השאלון נשמר');
+  if(ok){S.q=JSON.parse(JSON.stringify(D));S.dirty=false;render()}}
+function edAction(act,i,el){const D=S.draft;const live=D.map((q,j)=>j).filter(j=>!D[j].archived);const pos=live.indexOf(i);
+  if(act==='q-up'&&pos>0){const j=live[pos-1];[D[i],D[j]]=[D[j],D[i]]}
+  else if(act==='q-down'&&pos<live.length-1){const j=live[pos+1];[D[i],D[j]]=[D[j],D[i]]}
+  else if(act==='q-dup'){const c=JSON.parse(JSON.stringify(D[i]));c.id=uid('q');c.label+=' (עותק)';D.splice(i+1,0,c)}
+  else if(act==='q-remove'){const id=D[i].id;const used=Object.values(S.cands).some(c=>val(c,id)!=null);
+    D.forEach(q=>{if(q.match?.target===id)q.match={mode:'none'}});
+    if(used){D[i].archived=true;toast('השאלה הוסתרה. התשובות הקיימות נשמרות.')}else D.splice(i,1)}
+  else if(act==='q-restore')D[i].archived=false;
+  else if(act==='add-q'){const t=el.dataset.type;const q={id:uid('q'),type:t,label:t==='section'?'חלק חדש':'שאלה חדשה',help:'',required:false,showFor:'all',match:{mode:'none'}};
+    if(['single','select','multi'].includes(t))q.options=['אפשרות א','אפשרות ב'];D.push(q)}
+  else if(act==='copyopts'){const t=D.find(x=>x.id===D[i].match.target);if(t){D[i].options=[...opts(t)];if(D[i].type==='yesno'||D[i].type==='select')D[i].type='multi'}}
+  S.dirty=true;render();if(act==='add-q')window.scrollTo(0,document.body.scrollHeight)}
+
+/* ---------- events ---------- */
+document.addEventListener('click',async e=>{const tb=e.target.closest('[data-tab]');if(tb){if(tb.dataset.tab==='form')S.edit=null;setTab(tb.dataset.tab);return}
+  const go=e.target.closest('[data-tab-go]');if(go){setTab(go.dataset.tabGo);return}
+  const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const act=b.dataset.act,id=b.dataset.id;
+  if(act.startsWith('q-')||act==='add-q'||act==='copyopts'){edAction(act,+b.dataset.i,b);return}
+  switch(act){
+    case'logout':await S.db.auth.signOut();location.reload();break;
+    case'new':S.edit=null;setTab('form');break;
+    case'open':S.tab='cands';S.sel=id;S.confirm=null;window.scrollTo(0,0);render();break;
+    case'back':S.sel=null;S.confirm=null;render();break;
+    case'edit':S.edit=id;S.tab='form';window.scrollTo(0,0);render();break;
+    case'canceledit':S.sel=S.edit;S.edit=null;S.tab='cands';render();break;
+    case'matchfor':S.matchFor=id;setTab('match');break;
+    case'askdel':S.confirm='del:'+id;render();break;
+    case'askpdel':S.confirm='pdel:'+id;render();break;
+    case'cancel':S.confirm=null;render();break;
+    case'del':if(await write(()=>S.db.from('candidates').delete().eq('id',id),'המועמד/ת נמחק/ה')){delete S.cands[id];S.sel=null;S.confirm=null;render()}break;
+    case'pdel':if(await write(()=>S.db.from('proposals').delete().eq('id',id),'ההצעה נמחקה')){delete S.props[id];S.confirm=null;render()}break;
+    case'toggleout':S.showOut=!S.showOut;render();break;
+    case'propose':{const A=S.cands[S.matchFor];const p={m:A.gender==='m'?S.matchFor:id,f:A.gender==='m'?id:S.matchFor,status:'proposed',notes:'',createdAt:now(),updatedAt:now(),history:[{status:'proposed',at:now()}]};
+      b.disabled=true;const r=await write(()=>S.db.from('proposals').insert({male_id:p.m,female_id:p.f,status:p.status,notes:'',history:p.history}).select().single(),'ההצעה נוצרה. אפשר לעקוב אחריה בלשונית "הצעות".');if(r&&r.id){S.props[r.id]=fromP(r);render()}else b.disabled=false;break}
+    case'ed-save':saveEditor();break;
+    case'discard':S.draft=null;S.dirty=false;S.confirm=null;if(S.pendingTab){const t=S.pendingTab;S.pendingTab=null;setTab(t)}else render();break;
+  }});
+document.addEventListener('input',e=>{const el=e.target;
+  if(el.id==='f-q'){S.f.q=el.value;renderList();return}
+  if(S.tab==='editor'&&el.dataset.k&&el.type!=='checkbox'&&el.tagName!=='SELECT')edInput(el)});
+document.addEventListener('change',async e=>{const el=e.target;
+  if(el.id==='f-g'){S.f.g=el.value;renderList();return}if(el.id==='f-st'){S.f.st=el.value;renderList();return}if(el.id==='f-ms'){S.f.ms=el.value;renderList();return}if(el.id==='m-ms'){S.matchMs=el.value;render();return}
+  if(el.id==='m-for'){S.matchFor=el.value;S.showOut=false;render();return}if(el.id==='m-active'){S.onlyActive=el.checked;render();return}
+  if(S.tab==='editor'&&el.dataset.k&&(el.type==='checkbox'||el.tagName==='SELECT')){edInput(el);return}
+  if(el.dataset.pst){const pid=el.dataset.pst,p=S.props[pid],st=el.value;
+    const upd={status:st,updatedAt:now(),history:[...(p.history||[]),{status:st,at:now()}]};
+    if(await write(()=>S.db.from('proposals').update({status:upd.status,history:upd.history}).eq('id',pid),'השלב עודכן')){Object.assign(p,upd);
+      if(st==='mazal'){for(const cid of[p.m,p.f])if(S.cands[cid]){await write(()=>S.db.from('candidates').update({status:'engaged'}).eq('id',cid));S.cands[cid].status='engaged'}toast('מזל טוב! שני המועמדים סומנו כמאורסים.')}
+      render()}return}
+  if(el.dataset.pnote){const pid=el.dataset.pnote;if(S.props[pid]&&S.props[pid].notes!==el.value){const v=el.value;if(await write(()=>S.db.from('proposals').update({notes:v}).eq('id',pid),'ההערה נשמרה'))S.props[pid].notes=v}}
+});
+
+/* ---------- boot ---------- */
+let sb=null;try{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){sb=null}
+const quiet=()=>S.tab==='form'||(S.tab==='editor'&&S.dirty)||document.activeElement?.dataset?.pnote;
+async function loadAll(){
+  const[q,c,p]=await Promise.all([sb.from('settings').select('value').eq('key','questionnaire').maybeSingle(),sb.from('candidates').select('*'),sb.from('proposals').select('*')]);
+  if(q.error||c.error||p.error){console.error(q.error||c.error||p.error);toast('טעינת הנתונים נכשלה. בדקו את החיבור לאינטרנט ורעננו.',true);return}
+  S.q=(q.data&&q.data.value&&q.data.value.questions)||[];
+  const cs={};c.data.forEach(r=>cs[r.id]=fromC(r));S.cands=cs;
+  const ps={};p.data.forEach(r=>ps[r.id]=fromP(r));S.props=ps}
+let reloadT=null;
+function scheduleReload(){clearTimeout(reloadT);reloadT=setTimeout(async()=>{await loadAll();if(S.tab==='editor'&&!S.dirty)S.draft=null;renderStats();if(!quiet())render()},500)}
+function showLogin(msg){$('#app').hidden=true;$('#login').hidden=false;$('#lerr').textContent=msg||'';$('#l-btn').disabled=false}
+async function enter(session){
+  const {data,error}=await sb.from('staff').select('role').eq('user_id',session.user.id).maybeSingle();
+  if(error||!data){await sb.auth.signOut();showLogin(error?'לא ניתן להתחבר כרגע. נסו שוב.':'החשבון הזה אינו מורשה במערכת. פני למנהלת המשרד.');return}
+  S.canAdmin=data.role==='admin';S.db=sb;
+  $('#who').innerHTML=`<span dir="ltr">${esc(session.user.email)}</span><span>·</span><span>${S.canAdmin?'מנהלת':'שדכנית'}</span><button class="btn small" data-act="logout">יציאה</button>`;
+  $('#login').hidden=true;$('#app').hidden=false;render();
+  await loadAll();S.ready=true;render();
+  sb.channel('changes').on('postgres_changes',{event:'*',schema:'public'},scheduleReload).subscribe();
+}
+async function boot(){
+  if(!sb){document.body.innerHTML='<p style="padding:24px;font-family:sans-serif" dir="rtl">לא ניתן לטעון את המערכת. בדקו את החיבור לאינטרנט ורעננו את הדף.</p>';return}
+  $('#lform').addEventListener('submit',async e=>{e.preventDefault();const em=$('#l-email').value.trim(),pw=$('#l-pass').value;
+    if(!em||!pw){$('#lerr').textContent='יש למלא מייל וסיסמה.';return}
+    $('#l-btn').disabled=true;$('#lerr').textContent='';
+    const {data,error}=await sb.auth.signInWithPassword({email:em,password:pw});
+    if(error){showLogin(/fetch|network/i.test(error.message)?'אין חיבור לאינטרנט.':'המייל או הסיסמה אינם נכונים.');return}
+    enter(data.session)});
+  const {data}=await sb.auth.getSession();
+  if(data&&data.session)enter(data.session);else showLogin();
+}
+boot();
+</script>
+</body>
+</html>
